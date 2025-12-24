@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nhadt.roundeddonutchartexample"
+    namespace = "com.nhadt.roundeddonutchart"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.nhadt.roundeddonutchartexample"
+        applicationId = "com.nhadt.roundeddonutchart"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

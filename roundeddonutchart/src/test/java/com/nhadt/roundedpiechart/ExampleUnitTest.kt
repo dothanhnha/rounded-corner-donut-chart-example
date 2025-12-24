@@ -1,4 +1,4 @@
-package com.nhadt.roundedpiechartexample
+package com.nhadt.roundedpiechart
 
 import org.junit.Test
 

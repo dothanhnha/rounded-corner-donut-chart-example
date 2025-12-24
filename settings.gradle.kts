@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RoundedPieChartExample"
+rootProject.name = "RoundedDonutChartExample"
 include(":app")
- 
+include(":roundeddonutchart")
