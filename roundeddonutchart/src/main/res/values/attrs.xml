@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DonutChartView">
+        <attr name="gapAngle" format="float" />
+        <attr name="startAngle" format="float" />
+        <attr name="radiusRoundedDP" format="dimension" />
+        <attr name="percentStrokeWidthOnRadius" format="float" />
+    </declare-styleable>
+</resources>

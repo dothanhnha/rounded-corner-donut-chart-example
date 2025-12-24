@@ -1,4 +1,4 @@
-package com.nhadt.roundedpiechart
+package com.nhadt.roundeddonutchart
 
 import org.junit.Test
 
