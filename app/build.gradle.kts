@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.nhadt.roundeddonutchartexample"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.nhadt.roundeddonutchartexample"
@@ -36,10 +36,12 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":roundeddonutchart"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

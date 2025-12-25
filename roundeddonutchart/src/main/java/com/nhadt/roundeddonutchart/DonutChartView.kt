@@ -14,6 +14,13 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.graphics.component1
 import androidx.core.graphics.component2
+import kotlin.apply
+import kotlin.collections.elementAtOrNull
+import kotlin.collections.firstOrNull
+import kotlin.collections.forEachIndexed
+import kotlin.collections.map
+import kotlin.collections.sortBy
+import kotlin.let
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
@@ -22,6 +29,12 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.ranges.coerceAtMost
+import kotlin.ranges.coerceIn
+import kotlin.ranges.rangeTo
+import kotlin.run
+import kotlin.to
+
 
 class DonutChartView(context: Context, attrs: AttributeSet?) : View(
     context,
@@ -1215,30 +1228,9 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
     }
 }
 
-class CornerRoundedCoordinate(
-    val pointOnLine: PointF,
-    val pointOnCurve: PointF
-)
 
-class RoundedCornerIndex(
-    val cornerRoundedCoordinate: CornerRoundedCoordinate,
-    val centerRounded: PointF,
-    val roundedRadius: Float,
-    val startSweep: Float,
-    val sweep: Float
-)
 
-class SegmentRoundedCorners(
-    val outerStartSweep: RoundedCornerIndex?,
-    val innerStartSweep: RoundedCornerIndex?,
-    val outerEndSweep: RoundedCornerIndex?,
-    val innerEndSweep: RoundedCornerIndex?,
-)
 
-class CircleRoundedForTooSmallCase(
-    val startPointWhenDrawRounded: PointF,
-    val radius: Float,
-    val center: PointF,
-    val startAngle: Float,
-    val sweep: Float
-)
+
+
+

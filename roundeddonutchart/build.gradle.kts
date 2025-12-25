@@ -1,20 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.maven.publish)
 }
 
 android {
     namespace = "com.nhadt.roundeddonutchart"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.nhadt.roundeddonutchart"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -32,6 +30,27 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    publishing { // Add this
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        create("release", MavenPublication::class) {
+            groupId = "com.nhadt" // com.github.<yourusername>
+            artifactId = "RoundedDonutChart" // your repository name
+            version = "0.0.1" // version we want to publish (say 0.0.1)
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
     }
 }
 
