@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         val chart = findViewById<DonutChartView>(R.id.chart)
-        chart.setData(listOf(50F,50F), listOf(Color.RED, Color.BLUE))
+        chart.setData(listOf(50F,30F, 20F), Color.BLUE)
+        //chart.setDataHaveGradient(listOf(70f,30F), gradientColors = listOf(Color.RED to Color.BLUE, Color.BLACK to Color.GREEN))
     }
 }

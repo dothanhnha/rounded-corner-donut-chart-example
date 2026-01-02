@@ -2,9 +2,7 @@ package com.nhadt.roundeddonutchart
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.LinearGradient
-import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
@@ -12,28 +10,13 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.graphics.component1
-import androidx.core.graphics.component2
-import kotlin.apply
-import kotlin.collections.elementAtOrNull
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEachIndexed
-import kotlin.collections.map
-import kotlin.collections.sortBy
-import kotlin.let
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.ranges.coerceAtMost
-import kotlin.ranges.coerceIn
-import kotlin.ranges.rangeTo
-import kotlin.run
-import kotlin.to
 
 
 class DonutChartView(context: Context, attrs: AttributeSet?) : View(
@@ -141,25 +124,38 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
         invalidate()
     }
 
-    // For gradient colors
-    @JvmName("setDataWithGradientList")
-    fun setData(data: List<Float>, gradientColors: List<Pair<Int, Int>>) {
+    fun setData(data: List<Float>, solidColor: Int) {
         percentages = data
-        paints = gradientColors.map { colorPair ->
+        paints = List(data.size) {
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 isAntiAlias = true
                 style = Paint.Style.FILL
-                if (width > 0 && height > 0) {
-                    shader = LinearGradient(
-                        width / 2F, height.toFloat(), width / 2F, 0F,
-                        colorPair.first,
-                        colorPair.second,
-                        Shader.TileMode.CLAMP
-                    )
-                }
+                this@apply.color = solidColor
             }
         }
         invalidate()
+    }
+
+    // For gradient colors
+    fun setDataHaveGradient(data: List<Float>, gradientColors: List<Pair<Int, Int>>) {
+        this.post {
+            percentages = data
+            paints = gradientColors.map { colorPair ->
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    isAntiAlias = true
+                    style = Paint.Style.FILL
+                    if (width > 0 && height > 0) {
+                        this@apply.shader = LinearGradient(
+                            width / 2F, height.toFloat(), width / 2F, 0F,
+                            colorPair.first,
+                            colorPair.second,
+                            Shader.TileMode.CLAMP
+                        )
+                    }
+                }
+            }
+            invalidate()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -251,31 +247,25 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                         var roundedSegmentTooSmallOuter: CircleRoundedForTooSmallCase? = null
                         if (outerTooSmall) {
                             roundedSegmentTooSmallOuter = calculateRoundedSegmentTooSmall(
-                                center,
-                                radius,
-                                radiusInner,
-                                startAngle,
-                                sweepAngle,
-                                outerStartSweep,
-                                innerStartSweep,
-                                outerEndSweep,
-                                innerEndSweep,
-                                true
+                                center = center,
+                                radius = radius,
+                                radiusInner = radiusInner,
+                                sweepAngle = sweepAngle,
+                                outerStartSweep = outerStartSweep,
+                                outerEndSweep = outerEndSweep,
+                                isOuterTooSmall = true
                             )
                         }
                         var roundedSegmentTooSmallInner: CircleRoundedForTooSmallCase? = null
                         if (innerTooSmall) {
                             roundedSegmentTooSmallInner = calculateRoundedSegmentTooSmall(
-                                center,
-                                radius,
-                                radiusInner,
-                                startAngle,
-                                sweepAngle,
-                                outerStartSweep,
-                                innerStartSweep,
-                                outerEndSweep,
-                                innerEndSweep,
-                                false
+                                center = center,
+                                radius = radius,
+                                radiusInner = radiusInner,
+                                sweepAngle = sweepAngle,
+                                outerStartSweep = outerStartSweep,
+                                outerEndSweep = outerEndSweep,
+                                isOuterTooSmall = false
                             )
                         }
 
@@ -398,10 +388,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                             segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnCurve.x,
                             segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnCurve.y,
                         )
-                        /*oldPath.lineTo(
-                            segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnLine.x,
-                            segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnLine.y,
-                        )*/
                         oldPath.arcTo(
                             getRectWrapCircle(
                                 roundedInnerStartSweepIndex.centerRounded,
@@ -415,10 +401,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                             segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnLine.x,
                             segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnLine.y,
                         )
-                        /*oldPath.lineTo(
-                            segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnCurve.x,
-                            segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnCurve.y,
-                        )*/
                         oldPath.arcTo(
                             getRectWrapCircle(
                                 roundedOuterStartSweepIndex.centerRounded,
@@ -429,10 +411,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                             false
                         )
                         oldPath.arcTo(bounder, startAngleNew, sweepAngleNew)
-                        /*oldPath.lineTo(
-                            segmentRoundedCorners.outerEndSweep.cornerRoundedCoordinate.pointOnLine.x,
-                            segmentRoundedCorners.outerEndSweep.cornerRoundedCoordinate.pointOnLine.y,
-                        )*/
                         oldPath.arcTo(
                             getRectWrapCircle(
                                 roundedOuterEndSweepIndex.centerRounded,
@@ -446,10 +424,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                             segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnLine.x,
                             segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnLine.y,
                         )
-                        /*oldPath.lineTo(
-                            segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnCurve.x,
-                            segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnCurve.y,
-                        )*/
                         oldPath.arcTo(
                             getRectWrapCircle(
                                 roundedInnerEndSweepIndex.centerRounded,
@@ -461,16 +435,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                         )
                         oldPath.arcTo(innerRectF, startAngleNew + sweepAngleNew, -sweepAngleNew)
                         oldPath.close()
-                        //canvas.drawPath(oldPath, Paint().apply { color = Color.GREEN })
-//                        segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnCurve.draw(canvas, 2F)
-//                        segmentRoundedCorners.innerEndSweep.cornerRoundedCoordinate.pointOnLine.draw(canvas, 2F)
-//                        segmentRoundedCorners.outerEndSweep.cornerRoundedCoordinate.pointOnCurve.draw(canvas, 2F)
-//                        segmentRoundedCorners.outerEndSweep.cornerRoundedCoordinate.pointOnLine.draw(canvas, 2F)
-//
-//                        segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnCurve.draw(canvas, 2F)
-//                        segmentRoundedCorners.innerStartSweep.cornerRoundedCoordinate.pointOnLine.draw(canvas, 2F)
-//                        segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnCurve.draw(canvas, 2F)
-//                        segmentRoundedCorners.outerStartSweep.cornerRoundedCoordinate.pointOnLine.draw(canvas, 2F)
                     }
                 }
             }
@@ -481,12 +445,9 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
         center: PointF,
         radius: Float,
         radiusInner: Float,
-        startAngle: Float,
         sweepAngle: Float,
         outerStartSweep: PointF,
-        innerStartSweep: PointF,
         outerEndSweep: PointF,
-        innerEndSweep: PointF,
         isOuterTooSmall: Boolean
     ): CircleRoundedForTooSmallCase {
         val sweepAngleRad = sweepAngle.toRadian()
@@ -528,17 +489,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
         )
     }
 
-    fun PointF.draw(canvas: Canvas, radius: Float = 10F) {
-        canvas.drawCircle(
-            x,
-            y,
-            radius,
-            Paint().apply {
-                color = Color.RED
-            }
-        )
-    }
-
     private fun calculateRoundedSegment(
         center: PointF,
         radius: Float,
@@ -555,7 +505,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             center,
             radius,
             radiusInner,
-            startAngle,
             outerStartSweep,
             innerStartSweep,
             radiusRounded,
@@ -566,7 +515,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             center,
             radius,
             radiusInner,
-            startAngle,
             outerStartSweep,
             innerStartSweep,
             radiusRounded,
@@ -578,7 +526,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             center,
             radius,
             radiusInner,
-            startAngle + sweepAngle,
             outerEndSweep,
             innerEndSweep,
             radiusRounded,
@@ -589,7 +536,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             center,
             radius,
             radiusInner,
-            startAngle + sweepAngle,
             outerEndSweep,
             innerEndSweep,
             radiusRounded,
@@ -608,7 +554,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
         center: PointF,
         radius: Float,
         radiusInner: Float,
-        angleLine: Float,
         outerPointCornerSweep: PointF,
         innerPointCornerSweep: PointF,
         radiusRounded: Float,
@@ -663,12 +608,9 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
 
                 val cornerRoundedCoordinate = findTwoPointSweepRounded(
                     space,
-                    isOuterRounded,
                     center,
                     innerPointCornerSweep,
-                    outerPointCornerSweep,
                     centerRounded,
-                    radiusRounded,
                     if (isOuterRounded) radius else radiusInner
                 )
                 val sweepAngleRounded = if (isOuterRounded) {
@@ -691,37 +633,9 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
                         calculatePositiveAngle(centerRounded, cornerRoundedCoordinate.pointOnLine)
                     }
 
-                /*val path = Path()
-                path.moveTo(outerX.toFloat(), outerY.toFloat())  // Start at the outer arc point
-                // Draw outer arc:
-                path.arcTo(bounder, startAngle, sweepAngle, false)
-                path.lineTo(innerEndX.toFloat(), innerEndY.toFloat())
-                path.arcTo(innerRectF, startAngle + sweepAngle, -sweepAngle, false)
-                path.close()
-                canvas.drawPath(path, paint)*/
-
-                /*val path = Path()
-                path.moveTo(
-                    twoPointSweepRounded.second.x,
-                    twoPointSweepRounded.second.y
-                )  // Start at the outer arc point
-                // Draw outer arc:
-                path.arcTo(bounder, startAngleNew, sweepAngleNew, false)
-                path.lineTo(innerEndSweep.x, innerEndSweep.y)
-                path.arcTo(innerRectF, startAngle + sweepAngle, -sweepAngle, false)
-                path.lineTo(twoPointSweepRounded.first.x, twoPointSweepRounded.first.y)
-                path.arcTo(
-                    getRectWrapCircle(centerRounded, radiusRounded),
-                    startAngleRounded,
-                    sweepAngleRounded,
-                    false
-                )
-                path.close()*/
-
                 return RoundedCornerIndex(
                     cornerRoundedCoordinate = cornerRoundedCoordinate,
                     centerRounded = centerRounded,
-                    roundedRadius = radiusRounded,
                     startSweep = startAngleRounded,
                     sweep = sweepAngleRounded
                 )
@@ -729,15 +643,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
         }
         return null
     }
-
-    private fun getRandomColor(): Int {
-        return /*Color.rgb(
-            Random.nextInt(256),
-            Random.nextInt(256),
-            Random.nextInt(256)
-        )*/ Color.GRAY
-    }
-
 
     fun PointF.rotate(angleDegrees: Float, xCenter: Float, yCenter: Float): PointF {
         val angleRadians = angleDegrees.toRadian()
@@ -757,126 +662,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             first.rotate(angleDegrees, xCenter, yCenter),
             second.rotate(angleDegrees, xCenter, yCenter)
         )
-    }
-
-    fun drawRoundedTopRect(
-        canvas: Canvas,
-        paint: Paint,
-        bottomLeftInit: PointF,
-        height: Float,
-        width: Float,
-        cornerRadius: Float = 20f,
-        rotationAngle: Float,
-        centerRotate: PointF
-    ) {
-        val path = Path()
-        val rect = RectF()
-        rect.set(0f, 0f, width, height)
-
-        path.rewind()
-        // Start at bottom-left (0, 0) and move up the left side
-        path.moveTo(0f, height)
-        path.lineTo(0f, cornerRadius)
-
-        // Top-left corner
-        path.arcTo(
-            rect.left,
-            rect.top,
-            rect.left + 2 * cornerRadius,
-            rect.top + 2 * cornerRadius,
-            180f,
-            90f,
-            false
-        )
-
-        // Top line
-        path.lineTo(width - cornerRadius, 0f)
-
-        // Top-right corner
-        path.arcTo(
-            rect.right - 2 * cornerRadius,
-            rect.top,
-            rect.right,
-            rect.top + 2 * cornerRadius,
-            -90f,
-            90f,
-            false
-        )
-
-        // Right side
-        path.lineTo(width, height)
-
-        // Bottom line (back to the starting point, bottom-left)
-        path.lineTo(0f, height)
-
-        path.close()
-
-
-        val matrix = Matrix()
-        matrix.postTranslate(bottomLeftInit.x, bottomLeftInit.y - height)
-        matrix.postRotate(rotationAngle, centerRotate.x, centerRotate.y)
-        path.transform(matrix)
-
-        canvas.drawPath(path, paint)
-    }
-
-
-    fun drawRoundedRightRect(
-        canvas: Canvas,
-        paint: Paint,
-        topLeft: PointF,
-        bottomLeft: PointF,
-        width: Float,
-        cornerRadius: Float = 20f, // Default corner radius
-        rotationAngle: Float,
-        centerRotate: PointF
-    ) {
-        val path = Path()
-
-        // Calculate top right and bottom right points based on width:
-        val topRight = PointF(topLeft.x + width, topLeft.y)
-        val bottomRight = PointF(bottomLeft.x + width, bottomLeft.y)
-
-
-        //Move to the top-left corner
-        path.moveTo(topLeft.x, topLeft.y)
-
-        //Line to top-right
-        path.lineTo(topRight.x, topRight.y)
-
-        //Top-right rounded corner:
-        val topRightRect = RectF(
-            topRight.x - cornerRadius * 2,
-            topRight.y,
-            topRight.x,
-            topRight.y + cornerRadius * 2
-        )
-        path.arcTo(topRightRect, 270f, 90f, false)
-
-
-        //Line to bottom-right
-        path.lineTo(bottomRight.x, bottomRight.y)
-
-
-        //Bottom-right rounded corner:
-        val bottomRightRect = RectF(
-            bottomRight.x - cornerRadius * 2,
-            bottomRight.y - cornerRadius * 2,
-            bottomRight.x,
-            bottomRight.y
-        )
-        path.arcTo(bottomRightRect, 0f, 90f, false)
-
-        //Line to bottom-left
-        path.lineTo(bottomLeft.x, bottomLeft.y)
-
-        path.close()
-
-        val matrix = Matrix()
-        matrix.postRotate(rotationAngle, centerRotate.x, centerRotate.y)
-        path.transform(matrix)
-
-        canvas.drawPath(path, paint)
     }
 
     fun genParallelLines(
@@ -925,10 +710,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             )
         )
         return result
-    }
-
-    fun Pair<PointF, PointF>.drawLine(canvas: Canvas, paint: Paint) {
-        canvas.drawLine(first.x, first.y, second.x, second.y, paint)
     }
 
     private fun findPerpendicularPointOnLine(
@@ -998,12 +779,9 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
 
     private fun findTwoPointSweepRounded(
         spaceBetweenPerpendicularPointToCenterRounded: Float,
-        isOuterRounded: Boolean,
         center: PointF,
         innerPoint: PointF,
-        outerPoint: PointF,
         centerRounded: PointF,
-        radiusRounded: Float,
         radiusSweep: Float
     ): CornerRoundedCoordinate {
         return CornerRoundedCoordinate(
@@ -1014,98 +792,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
             ),
             pointOnCurve = pointAtDistanceOnLine(center, centerRounded, radiusSweep)
         )
-    }
-
-    fun circleCircleIntersection(
-        pointA: PointF, radiusA: Float,
-        pointB: PointF, radiusB: Float
-    ): List<PointF> {
-
-        val dx = pointB.x - pointA.x
-        val dy = pointB.y - pointA.y
-        val d = sqrt(dx * dx + dy * dy)
-
-        // No intersection: circles are separate or one is contained within the other
-        if (d > radiusA + radiusB || d < abs(radiusA - radiusB) || d == 0f) {
-            return emptyList()
-        }
-
-        // Distance from pointA to the midpoint between intersection points
-        val a = (radiusA * radiusA - radiusB * radiusB + d * d) / (2 * d)
-
-        // Coordinates of that midpoint
-        val midX = pointA.x + (dx * a / d)
-        val midY = pointA.y + (dy * a / d)
-
-        // Height from midpoint to intersection points
-        val h = sqrt(radiusA * radiusA - a * a)
-
-        // Offsets from the midpoint to get the intersection points
-        val rx = -dy * (h / d)
-        val ry = dx * (h / d)
-
-        val intersection1 = PointF(midX + rx, midY + ry)
-        val intersection2 = PointF(midX - rx, midY - ry)
-
-        return if (h == 0f) {
-            listOf(intersection1) // One intersection (tangent)
-        } else {
-            listOf(intersection1, intersection2)
-        }
-    }
-
-
-    fun findLineCircleIntersections(
-        circleCenter: PointF,
-        radius: Float,
-        linePoint1: PointF,
-        linePoint2: PointF
-    ): List<PointF> {
-        val (x1, y1) = linePoint1
-        val (x2, y2) = linePoint2
-        val (cx, cy) = circleCenter
-
-        // Calculate the coefficients of the line equation (ax + by + c = 0)
-        val a = y2 - y1
-        val b = x1 - x2
-        val c = -(a * x1 + b * y1)
-
-        // Calculate the distance from the circle center to the line
-        val distance = distanceFromPointToLine(linePoint1, linePoint2, circleCenter)
-        // Check if the line intersects the circle
-        if (distance > radius) {
-            return emptyList() // No intersection
-        }
-
-        // Calculate the intersection points
-        val intersectionPoints = mutableListOf<PointF>()
-
-        // Calculate the parameters for the intersection points
-        val x0 = -a * c / (a.pow(2) + b.pow(2))
-        val y0 = -b * c / (a.pow(2) + b.pow(2))
-        val d = radius.pow(2) - distance.pow(2)
-        val mult = sqrt(d / (a.pow(2) + b.pow(2)))
-
-        // Calculate the coordinates of the intersection points
-        val intersectionX1 = (x0 + b * mult).toFloat() + cx
-        val intersectionY1 = (y0 - a * mult).toFloat() + cy
-        val intersectionX2 = (x0 - b * mult).toFloat() + cx
-        val intersectionY2 = (y0 + a * mult).toFloat() + cy
-
-        intersectionPoints.add(
-            PointF(
-                intersectionX1 - x0.toFloat() + cx,
-                intersectionY1 - y0.toFloat() + cy
-            )
-        )
-        intersectionPoints.add(
-            PointF(
-                intersectionX2 - x0.toFloat() + cx,
-                intersectionY2 - y0.toFloat() + cy
-            )
-        )
-
-        return intersectionPoints
     }
 
     fun calculatePositiveAngle(pointA: PointF, pointB: PointF): Float {
@@ -1181,24 +867,6 @@ class DonutChartView(context: Context, attrs: AttributeSet?) : View(
 
     fun Float.toRadian(): Float {
         return this * PI.toFloat() / 180F
-    }
-
-    fun distanceFromPointToLine(
-        pointA1: PointF,
-        pointA2: PointF,
-        pointB: PointF
-    ): Float {
-        val x0 = pointB.x
-        val y0 = pointB.y
-        val x1 = pointA1.x
-        val y1 = pointA1.y
-        val x2 = pointA2.x
-        val y2 = pointA2.y
-
-        val numerator = abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1)
-        val denominator = sqrt((y2 - y1).pow(2) + (x2 - x1).pow(2))
-
-        return numerator / denominator
     }
 
     fun getMidPoint(

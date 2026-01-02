@@ -10,7 +10,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -43,9 +42,9 @@ android {
 publishing {
     publications {
         create("release", MavenPublication::class) {
-            groupId = "com.nhadt" // com.github.<yourusername>
-            artifactId = "RoundedDonutChart" // your repository name
-            version = "0.0.2" // version we want to publish (say 0.0.1)
+            groupId = "com.nhadt"
+            artifactId = "RoundedDonutChart"
+            version = "0.0.3"
 
             afterEvaluate {
                 from(components["release"])
